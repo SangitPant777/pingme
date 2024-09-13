@@ -33,7 +33,7 @@ document.getElementById('pingButton').addEventListener('click', () => {
 onValue(pingRef, (snapshot) => {
   const data = snapshot.val();
   if (data && data.alert) {
-    playSound();
+    playSound(); // Play sound immediately
     set(pingRef, { alert: false }); // Reset after alert
   }
 });
