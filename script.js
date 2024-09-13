@@ -33,22 +33,15 @@ document.getElementById('pingButton').addEventListener('click', () => {
 onValue(pingRef, (snapshot) => {
   const data = snapshot.val();
   if (data && data.alert) {
-    playSoundAndAlert();
+    playSound();
     set(pingRef, { alert: false }); // Reset after alert
   }
 });
 
-// Function to play sound and alert the user
-function playSoundAndAlert() {
-  // Play the sound
+// Function to play sound
+function playSound() {
   const audio = new Audio('ping-sound.mp3'); // Ensure you have this file in the same directory
-  audio.play().then(() => {
-    // Show the alert after a small delay
-    setTimeout(() => {
-      alert("Ping received!");
-    }, 100); // Delay to allow the sound to play before the alert blocks
-  }).catch(error => {
-    // Handle any errors that occur during playback
+  audio.play().catch(error => {
     console.error("Error playing sound:", error);
   });
 }
