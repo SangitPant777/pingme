@@ -40,10 +40,15 @@ onValue(pingRef, (snapshot) => {
 
 // Function to alert the user
 function alertUser() {
-  // Display a browser alert
-  alert("Ping received!");
-
-  // Play a sound (optional)
+  // Play a sound
   const audio = new Audio('ping-sound.mp3'); // Ensure you have this file in the same directory
-  audio.play();
+  audio.play().catch(error => {
+    // Handle any errors that occur during playback
+    console.error("Error playing sound:", error);
+  });
+
+  // Display a browser alert after the sound starts playing
+  setTimeout(() => {
+    alert("Ping received!");
+  }, 100); // Delay to ensure sound starts before the alert
 }
