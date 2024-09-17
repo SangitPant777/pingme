@@ -3,44 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Ping Alert</title>
-    <!-- Firebase App (the core Firebase SDK) -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js" type="module"></script>
-    <!-- Firebase Realtime Database -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js" type="module"></script>
-    <!-- Firebase Analytics (optional) -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js" type="module"></script>
+    <title>Ping and Messaging App</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
         }
         .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             text-align: center;
         }
         #pingButton {
-            padding: 15px 30px;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #ff6961;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        #messageInput {
+            width: 100%;
+            padding: 10px;
             font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #sendButton {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
-        #pingButton:hover {
-            background-color: #0056b3;
+        #messages {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: left;
+        }
+        .message {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <button id="pingButton">Ping!</button>
+
+<div class="container">
+    <button id="pingButton">Send Ping</button>
+    <input type="text" id="messageInput" placeholder="Type your message...">
+    <button id="sendButton">Send Message</button>
+
+    <div id="messages">
+        <!-- Received messages will be shown here -->
     </div>
-    <script type="module" src="script.js"></script>
+</div>
+
+<script type="module">
+    // Import the necessary Firebase functions
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+    import { getDatabase, ref, set, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBjkQGr8vAqT2lRnB2v9a4ApMQnZG0jPFM",
+        authDomain: "ping-data-6f691.firebaseapp.com",
+        databaseURL: "https://ping-data-6f691-default-rtdb.firebaseio.com",
+        projectId: "ping-data-6f691",
+        storageBucket: "ping-data-6f691.appspot.com",
+        messagingSenderId: "738608800311",
+        appId: "1:738608800311:web:17bb3eca3ec33d546215b2",
+        measurementId: "G-RVXDV4PBYN"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const pingRef = ref(database, 'ping');
+    const messageRef = ref(database, 'messages');
+
+    // Function to send a ping
+    document.getElementById('pingButton').addEventListener('click', () => {
+        set(pingRef, {
+            alert: true,
+            timestamp: Date.now()
+        });
+        playPingSound();
+    });
+
+    // Listen for pings and play sound
+    onChildAdded(pingRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.alert) {
+            playPingSound(); // Play sound on ping
+        }
+    });
+
+    // Function to send a message
+    document.getElementById('sendButton').addEventListener('click', () => {
+        const message = document.getElementById('messageInput').value;
+        if (message) {
+            push(messageRef, {
+                text: message,
+                timestamp: Date.now()
+            });
+            document.getElementById('messageInput').value = '';
+        }
+    });
+
+    // Listen for new messages and display them
+    onChildAdded(messageRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.text) {
+            displayMessage(data.text);
+        }
+    });
+
+    // Function to play ping sound
+    function playPingSound() {
+        const audio = new Audio('ping-sound.mp3'); // Ensure the sound file is in your project folder
+        audio.play().catch(error => {
+            console.error("Error playing sound:", error);
+        });
+    }
+
+    // Function to display a message
+    function displayMessage(message) {
+        const messageContainer = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.textContent = message;
+        messageContainer.appendChild(messageElement);
+        messageContainer.scrollTop = messageContainer.scrollHeight; // Auto-scroll to bottom
+    }
+</script>
+
 </body>
 </html>
