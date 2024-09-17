@@ -35,7 +35,7 @@
             font-size: 18px;
             cursor: pointer;
         }
-        #messageInput {
+        #messageInput, #nameInput {
             width: 100%;
             padding: 10px;
             font-size: 16px;
@@ -72,6 +72,7 @@
 <body>
 
 <div class="container">
+    <input type="text" id="nameInput" placeholder="Enter your name" />
     <button id="pingButton">Send Ping</button>
     <input type="text" id="messageInput" placeholder="Type your message...">
     <button id="sendButton">Send Message</button>
@@ -104,10 +105,12 @@
     const pingRef = ref(database, 'ping');
     const messageRef = ref(database, 'messages');
 
-    // Function to send a ping
+    // Function to send a ping with sender info
     document.getElementById('pingButton').addEventListener('click', () => {
-        set(pingRef, {
+        const name = document.getElementById('nameInput').value || 'Anonymous';
+        push(pingRef, {
             alert: true,
+            sender: name,
             timestamp: Date.now()
         });
         playPingSound();
@@ -117,16 +120,19 @@
     onChildAdded(pingRef, (snapshot) => {
         const data = snapshot.val();
         if (data && data.alert) {
-            playPingSound(); // Play sound on ping
+            playPingSound();
+            displayMessage(`Ping received from ${data.sender}`);
         }
     });
 
     // Function to send a message
     document.getElementById('sendButton').addEventListener('click', () => {
         const message = document.getElementById('messageInput').value;
+        const name = document.getElementById('nameInput').value || 'Anonymous';
         if (message) {
             push(messageRef, {
                 text: message,
+                sender: name,
                 timestamp: Date.now()
             });
             document.getElementById('messageInput').value = '';
@@ -137,7 +143,7 @@
     onChildAdded(messageRef, (snapshot) => {
         const data = snapshot.val();
         if (data && data.text) {
-            displayMessage(data.text);
+            displayMessage(`${data.sender}: ${data.text}`);
         }
     });
 
